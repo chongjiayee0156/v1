@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Pinned Repositories</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-semibold mb-6">GitHub Pinned Repositories Viewer</h1>
+
+        <form action="/repos" method="post" class="mb-8">
+            <label for="username" class="block text-lg">Enter GitHub Username:</label>
+            <input type="text" name="username" id="username" class="border rounded-md p-2 mt-2 w-full" placeholder="GitHub username" required>
+            <button type="submit" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md">Get Repos</button>
+        </form>
+
+        {% if error %}
+            <div class="text-red-500">{{ error }}</div>
+        {% endif %}
+
+        <div id="repos-list"></div>
+    </div>
+</body>
+</html>
