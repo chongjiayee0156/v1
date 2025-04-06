@@ -5,6 +5,7 @@ import os
 import requests
 from dotenv import load_dotenv
 from typing import List, Optional
+from fastapi.responses import JSONResponse
 
 # Load environment variables from .env file
 load_dotenv()
@@ -75,5 +76,15 @@ async def repos(request: Request, username: str = Form(...)):
     if repos is None:
         return templates.TemplateResponse("home.html", {"request": request, "error": "Failed to fetch repos or no pinned repos found."})
     return templates.TemplateResponse("repos.html", {"request": request, "repos": repos, "username": username})
+  
+
+@app.get("/api/repos/{username}")
+async def api_repos(username: str):
+    token = get_github_token()
+    repos = fetch_pinned_repos(username, token)
+    if repos is None:
+        return JSONResponse(content={"error": "Failed to fetch repos."}, status_code=400)
+    return {"repos": repos}
+
 
 

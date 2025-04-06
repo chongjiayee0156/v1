@@ -4,23 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GitHub Pinned Repositories</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script> <!-- Using Tailwind Play CDN for simplicity -->
+    <style>
+        /* Optional: Add custom base styles or font imports here */
+        body {
+            font-family: 'Inter', sans-serif; /* Example using Inter font */
+        }
+        /* Add a subtle background pattern or keep it clean */
+        body {
+            background-color: #f8fafc; /* Tailwind gray-50 */
+        }
+    </style>
+     <link rel="preconnect" href="https://rsms.me/">
+     <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
 </head>
-<body class="bg-gray-100">
-    <div class="container mx-auto px-4 py-8">
-        <h1 class="text-3xl font-semibold mb-6">GitHub Pinned Repositories Viewer</h1>
+<body class="antialiased text-gray-800">
+    <div class="min-h-screen flex flex-col items-center justify-center px-4 py-12 bg-gradient-to-br from-gray-50 to-gray-200">
+        <div class="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
+            <h1 class="text-3xl font-bold text-center text-gray-900 mb-2">GitHub Pinned Repos</h1>
+            <p class="text-center text-gray-600 mb-8">Enter a GitHub username to view their pinned repositories.</p>
 
-        <form action="/repos" method="post" class="mb-8">
-            <label for="username" class="block text-lg">Enter GitHub Username:</label>
-            <input type="text" name="username" id="username" class="border rounded-md p-2 mt-2 w-full" placeholder="GitHub username" required>
-            <button type="submit" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md">Get Repos</button>
-        </form>
+            <form action="/repos" method="post" class="space-y-6">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700 sr-only">GitHub Username</label>
+                    <input type="text" name="username" id="username" value="{{ username or '' }}" class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="e.g., torvalds" required>
+                </div>
 
-        {% if error %}
-            <div class="text-red-500">{{ error }}</div>
-        {% endif %}
+                <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
+                    Fetch Repositories
+                </button>
+            </form>
 
-        <div id="repos-list"></div>
+            {% if error %}
+                <div class="mt-6 p-4 bg-red-100 border border-red-300 text-red-700 rounded-lg text-sm">
+                    <p><span class="font-medium">Error:</span> {{ error }}</p>
+                </div>
+            {% endif %}
+        </div>
+        <footer class="mt-8 text-center text-gray-500 text-sm">
+            Powered by FastAPI & Tailwind CSS
+        </footer>
     </div>
 </body>
 </html>
