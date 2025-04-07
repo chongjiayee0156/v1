@@ -9,48 +9,65 @@
       rel="stylesheet"
     />
   </head>
-  <!-- React + Babel -->
-  <script
-    src="https://unpkg.com/react@18/umd/react.development.js"
-    crossorigin
-  ></script>
-  <script
-    src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"
-    crossorigin
-  ></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script type="text/babel">
-    function RepoCard({ repo }) {
-      return (
-        <div className="bg-gray-50 p-4 rounded-md shadow-sm mb-4 border">
-          <h2 className="text-xl font-bold text-blue-700">{repo.name}</h2>
-          <a href={repo.url} target="_blank" className="text-blue-500 underline">Visit Repository</a>
-          <p className="text-gray-600 mt-1">{repo.description || "No description provided"}</p>
-          <div className="text-sm text-gray-500 mt-2">
-            ⭐ {repo.stargazerCount} | 🍴 {repo.forkCount} | 💻 {repo.primaryLanguage?.name || "N/A"}
-          </div>
-        </div>
-      );
-    }
-
-    function RepoList({ repos }) {
-      return (
-        <div>
-          <h1 className="text-2xl font-semibold mb-4">React Rendered Repositories</h1>
-          {repos.map((edge, idx) => (
-            <RepoCard key={idx} repo={edge.node} />
-          ))}
-        </div>
-      );
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      ReactDOM.createRoot(document.getElementById("react-root")).render(
-        <RepoList repos={reposJSON} />
-      );
-    });
-  </script>
   <body class="bg-gray-100 text-gray-800 font-sans">
+    <!-- React + Babel -->
+    <script
+      src="https://unpkg.com/react@18/umd/react.development.js"
+      crossorigin
+    ></script>
+    <script
+      src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"
+      crossorigin
+    ></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="text/babel">
+      function RepoCard({ repo }) {
+        return (
+          <div className="bg-gray-50 p-4 rounded-md shadow-sm mb-4 border">
+            <h2 className="text-xl font-bold text-blue-700">{repo.name}</h2>
+            <a
+              href={repo.url}
+              target="_blank"
+              className="text-blue-500 underline"
+            >
+              Visit Repository
+            </a>
+            <p className="text-gray-600 mt-1">
+              {repo.description || "No description provided"}
+            </p>
+            <div className="text-sm text-gray-500 mt-2">
+              ⭐ {repo.stargazerCount} | 🍴 {repo.forkCount} | 💻{" "}
+              {repo.primaryLanguage?.name || "N/A"}
+            </div>
+          </div>
+        );
+      }
+
+      function RepoList({ repos }) {
+        return (
+          <div>
+            <h1 className="text-2xl font-semibold mb-4">
+              React Rendered Repositories
+            </h1>
+            {repos.map((edge, idx) => (
+              <RepoCard key={idx} repo={edge.node} />
+            ))}
+          </div>
+        );
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const reposJSON = JSON.parse(
+          document.getElementById("repos-json").textContent
+        );
+
+        const reactRoot = document.getElementById("react-root");
+        if (reactRoot) {
+          ReactDOM.createRoot(reactRoot).render(<RepoList repos={reposJSON} />);
+        }
+      });
+    </script>
+
     <div class="container mx-auto px-4 py-10 max-w-5xl">
       <h1 class="text-4xl font-bold mb-2">
         Pinned Repositories of {{ username }}
@@ -62,22 +79,18 @@
       <!-- Tabs -->
       <div class="flex space-x-4 border-b mb-6">
         <button
+          id="tab-button-repos"
           class="tab-button text-gray-600 border-b-2 pb-2"
-          onclick="showTab('repos')"
+          onclick="showTab('repos', this)"
         >
           Pinned Repositories
         </button>
         <button
+          id="tab-button-json"
           class="tab-button text-gray-600 border-b-2 pb-2"
-          onclick="showTab('json')"
+          onclick="showTab('json', this)"
         >
           JSON
-        </button>
-        <button
-          class="tab-button text-gray-600 border-b-2 pb-2"
-          onclick="showTab('code')"
-        >
-          Code
         </button>
       </div>
 
@@ -87,7 +100,7 @@
         <div class="space-y-6">
           {% for repo_edge in repos %} {% set repo = repo_edge.node %}
           <div
-            class="bg-white p-6 rounded-xl shadow-md transition hover:shadow-lg"
+            class="bg-white p-6 rounded-xl shadow-md transition hover:shadow-lg relative"
           >
             <div class="flex justify-between items-start">
               <div>
@@ -140,15 +153,14 @@
           >
         </div>
       </div>
+    </div>
 
-      <!-- Code Tab (Display JSX Code + JSON Data) -->
-      <div id="tab-code" class="tab-content hidden">
-        <div
-          class="bg-gray-900 text-gray-100 rounded-xl shadow-md p-6 text-sm font-mono overflow-x-auto whitespace-pre h-[500px] relative"
-        >
-          <pre id="code-output" class="pr-10"></pre>
-        </div>
-      </div>
+    <!-- Toast notification for copy success -->
+    <div
+      id="toast"
+      class="fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-md shadow-lg transform translate-y-full transition-transform duration-300 opacity-0"
+    >
+      Copied to clipboard!
     </div>
 
     <!-- Scripts -->
@@ -177,83 +189,35 @@
           });
       }
 
-      function showTab(tab) {
+      function showToast(message) {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.style.transform = "translateY(0)";
+        toast.style.opacity = "1";
+
+        setTimeout(() => {
+          toast.style.transform = "translateY(full)";
+          toast.style.opacity = "0";
+        }, 2000);
+      }
+
+      function showTab(tab, buttonElement) {
         document
           .querySelectorAll(".tab-content")
           .forEach((el) => el.classList.add("hidden"));
+
         document.getElementById("tab-" + tab).classList.remove("hidden");
 
         document.querySelectorAll(".tab-button").forEach((btn) => {
           btn.classList.remove("text-blue-600", "border-blue-500");
         });
-        event.target.classList.add("text-blue-600", "border-blue-500");
+
+        buttonElement.classList.add("text-blue-600", "border-blue-500");
       }
 
       document.addEventListener("DOMContentLoaded", () => {
-        showTab("repos");
-
-        // JSX code and JSON data template to display in the Code Tab
-        const jsxCode = `
-function RepoCard({ repo }) {
-  return (
-    <div className="bg-gray-50 p-4 rounded-md shadow-sm mb-4 border">
-      <h2 className="text-xl font-bold text-blue-700">{repo.name}</h2>
-      <a href={repo.url} target="_blank" className="text-blue-500 underline">Visit Repository</a>
-      <p className="text-gray-600 mt-1">{repo.description || "No description provided"}</p>
-      <div className="text-sm text-gray-500 mt-2">
-        ⭐ {repo.stargazerCount} | 🍴 {repo.forkCount} | 💻 {repo.primaryLanguage?.name || "N/A"}
-      </div>
-    </div>
-  );
-}
-
-function RepoList({ repos }) {
-  return (
-    <div>
-      <h1 className="text-2xl font-semibold mb-4">React Rendered Repositories</h1>
-      {repos.map((edge, idx) => (
-        <RepoCard key={idx} repo={edge.node} />
-      ))}
-    </div>
-  );
-}
-        `;
-
-        const jsonData = JSON.stringify(reposJSON, null, 2);
-
-        const codeTemplate = `// JSX Code to render repositories UI
-const reposJSON = ${jsonData};
-
-function RepoCard({ repo }) {
-  return (
-    <div className="bg-gray-50 p-4 rounded-md shadow-sm mb-4 border">
-      <h2 className="text-xl font-bold text-blue-700">{repo.name}</h2>
-      <a href={repo.url} target="_blank" className="text-blue-500 underline">Visit Repository</a>
-      <p className="text-gray-600 mt-1">{repo.description || "No description provided"}</p>
-      <div className="text-sm text-gray-500 mt-2">
-        ⭐ {repo.stargazerCount} | 🍴 {repo.forkCount} | 💻 {repo.primaryLanguage?.name || "N/A"}
-      </div>
-    </div>
-  );
-}
-
-function RepoList({ repos }) {
-  return (
-    <div>
-      <h1 className="text-2xl font-semibold mb-4">React Rendered Repositories</h1>
-      {repos.map((edge, idx) => (
-        <RepoCard key={idx} repo={edge.node} />
-      ))}
-    </div>
-  );
-}
-
-ReactDOM.createRoot(document.getElementById('react-root')).render(
-  <RepoList repos={reposJSON} />
-);
-        `;
-
-        document.getElementById("code-output").textContent = codeTemplate;
+        const defaultButton = document.getElementById("tab-button-repos");
+        showTab("repos", defaultButton);
       });
     </script>
   </body>
